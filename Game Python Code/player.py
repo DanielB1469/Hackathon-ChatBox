@@ -1,11 +1,11 @@
 import pygame
-<<<<<<< HEAD
+
 from settings import SPEED, JUMP_FORCE, FLOOR_HEIGHT, CHAR_SIZE, SCALE
 from assets import character_frames, punch_frames
 from audio import block_sound, punch_sound, walking_sound, landing_sound  # Import the sounds
-=======
+
 from settings import SPEED, JUMP_FORCE, FLOOR_HEIGHT, CHAR_SIZE, SCALE, WIN_WIDTH, GRAVITY
->>>>>>> 656591b2005c852e58459d08af1b174a003d137e
+
 
 class Player:
     def __init__(self, x, y):
@@ -15,16 +15,6 @@ class Player:
         self.moving = False
         self.animation_index = 0
         self.frame_count = 0
-<<<<<<< HEAD
-=======
-        self.facing_right = True  # ✅ Track which direction the player is facing
-
-        # ✅ Health
-        self.max_health = 100
-        self.health = self.max_health
-
-        # Punch state
->>>>>>> 656591b2005c852e58459d08af1b174a003d137e
         self.is_punching = False
         self.punch_index = 0
         self.punch_timer = 0
@@ -36,19 +26,9 @@ class Player:
         if not self.is_punching:  # Prevent movement when punching
             if keys[pygame.K_a]:  # Move left
                 self.rect.x -= SPEED
-<<<<<<< HEAD
                 self.moving = True
             if keys[pygame.K_d]:  # Move right
                 self.rect.x += SPEED
-=======
-                self.rect.x = max(0, self.rect.x)  # Prevent moving off-screen
-                self.moving = True
-                self.facing_right = False  # ✅ Correctly set facing direction
-
-            if keys[pygame.K_d]:  # Move right
-                self.rect.x += SPEED
-                self.rect.x = min(WIN_WIDTH - self.rect.width, self.rect.x)  # Prevent moving off-screen
->>>>>>> 656591b2005c852e58459d08af1b174a003d137e
                 self.moving = True
                 self.facing_right = True  # ✅ Correctly set facing direction
 
@@ -107,12 +87,7 @@ class Player:
         else:
             self.animation_index = 0  # Reset to first frame when idle
 
-<<<<<<< HEAD
     def draw(self, screen):
-=======
-    def draw(self, screen, character_frames, punch_frames):
-        """Draw player sprite on screen and flip it based on direction"""
->>>>>>> 656591b2005c852e58459d08af1b174a003d137e
         if self.is_punching:
             sprite = punch_frames[self.punch_index]
         else:
