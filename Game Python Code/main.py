@@ -4,31 +4,14 @@ from player import Player
 from ui_screens import draw_start_screen, draw_select_screen, draw_pause_screen
 from assets import enemy_sprites, character_frames, punch_frames
 
-# Initialize pygame
+# ✅ Enable Fullscreen
 pygame.init()
-
-# Constants
-CHAR_SIZE = 32  # Character size (assumed to be 32x32)
-SCALE = 4  # Scaling factor for visibility
-WIN_WIDTH = CHAR_SIZE * 30  # 20 tiles wide
-WIN_HEIGHT = CHAR_SIZE * 15  # 15 tiles high
-FLOOR_HEIGHT = WIN_HEIGHT - CHAR_SIZE * 4  # Floor Y position
-
-# Physics
-GRAVITY = 0.8
-JUMP_FORCE = -12
-SPEED = 5
-ANIMATION_SPEED = 10  # Walking animation speed
-PUNCH_ANIMATION_SPEED = 8  # Punch animation speed
-PUNCH_DURATION = 16  # How long the punch lasts
-
-# Setup the window
 screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("AI Boxing Game")
 
-# Load background image and scale it to window size
-background = pygame.image.load("BoxingRing.png")
-background = pygame.transform.scale(background, (WIN_WIDTH, WIN_HEIGHT))
+# ✅ Load Game Background for In-Game
+game_background = pygame.image.load("BoxingRing.png")
+game_background = pygame.transform.scale(game_background, (WIN_WIDTH, WIN_HEIGHT))
 
 # Game state
 game_state = STATE_START
@@ -48,8 +31,8 @@ running = True
 clock = pygame.time.Clock()
 
 while running:
-    # **Draw Background First**
-    screen.blit(background, (0, 0))
+    if game_state == STATE_PLAYING:
+        screen.blit(game_background, (0, 0))  # ✅ Show game background only in PLAYING state
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -90,7 +73,7 @@ while running:
 
     # **MENU SCREENS**
     if game_state == STATE_START:
-        draw_start_screen(screen, font)  # ✅ Now shows background image
+        draw_start_screen(screen, font)  # ✅ Start screen now has fading text
 
     elif game_state == STATE_SELECT:
         draw_select_screen(screen, font, enemy_names, selected_enemy_index)
@@ -104,7 +87,7 @@ while running:
         player.update_animation(10, 8)
         player.draw(screen, character_frames, punch_frames)  # ✅ Fix: Pass frames here
 
-        screen.blit(enemy_sprite, (600, FLOOR_HEIGHT))  # Draw selected enemy
+        screen.blit(enemy_sprite, (600, FLOOR_HEIGHT))  # ✅ Draw selected enemy
 
     pygame.display.flip()
     clock.tick(60)  # Limit FPS to 60
