@@ -19,19 +19,26 @@ GRAY = (100, 100, 100)
 GRAVITY = 0.8
 JUMP_FORCE = -12
 SPEED = 5
+ANIMATION_SPEED = 10  # Adjust animation speed
 
 # Setup the window
 screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("Pygame Platformer")
 
-# Load character sprite
-character_img = pygame.image.load("Sprite-0001.png")
-character_img = pygame.transform.scale(character_img, (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE))
+# Load character animation frames
+character_frames = [
+    pygame.transform.scale(pygame.image.load("SpriteWalking1.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
+    pygame.transform.scale(pygame.image.load("SpriteWalking2.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
+    pygame.transform.scale(pygame.image.load("SpriteWalking3.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
+]
 
 # Character properties
 character = pygame.Rect(100, FLOOR_HEIGHT, CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)
 velocity_y = 0
 on_ground = False
+moving = False
+animation_index = 0
+frame_count = 0
 
 # Game loop
 running = True
@@ -48,11 +55,14 @@ while running:
     # Get key presses
     keys = pygame.key.get_pressed()
     
-    # Horizontal movement
+    # Movement logic
+    moving = False
     if keys[pygame.K_a]:
         character.x -= SPEED
+        moving = True
     if keys[pygame.K_d]:
         character.x += SPEED
+        moving = True
 
     # Jumping
     if keys[pygame.K_w] and on_ground:
@@ -75,10 +85,19 @@ while running:
     if character.x > WIN_WIDTH - character.width:
         character.x = WIN_WIDTH - character.width
 
+    # Handle animation
+    if moving:
+        frame_count += 1
+        if frame_count >= ANIMATION_SPEED:
+            frame_count = 0
+            animation_index = (animation_index + 1) % len(character_frames)
+    else:
+        animation_index = 0  # Reset to first frame when idle
+
     # Drawing
     screen.fill(GRAY)  # Background color
     pygame.draw.rect(screen, BLACK, (0, FLOOR_HEIGHT + CHAR_SIZE * SCALE, WIN_WIDTH, CHAR_SIZE * SCALE))  # Floor
-    screen.blit(character_img, (character.x, character.y))  # Draw character
+    screen.blit(character_frames[animation_index], (character.x, character.y))  # Draw character
 
     # Update display
     pygame.display.flip()
