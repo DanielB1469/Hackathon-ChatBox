@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 from player import Player
+from opponent import Opponent  # ✅ Import the opponent AI
 from ui_screens import draw_start_screen, draw_select_screen, draw_pause_screen
 from assets import enemy_sprites, character_frames, punch_frames
 
@@ -24,8 +25,11 @@ enemy_names = list(enemy_sprites.keys())
 selected_enemy_index = 0
 can_navigate = True  # Prevent holding navigation keys in menus
 
-# Create player
+# Create Player
 player = Player(100, FLOOR_HEIGHT)
+
+# ✅ Opponent will be created when entering the game
+opponent = None  
 
 running = True
 clock = pygame.time.Clock()
@@ -55,6 +59,9 @@ while running:
                     enemy_name = enemy_names[selected_enemy_index]
                     enemy_sprite = enemy_sprites[enemy_name]
                     game_state = STATE_PLAYING
+
+                    # ✅ Create Opponent when entering the game
+                    opponent = Opponent(600, FLOOR_HEIGHT, 2, 150)
 
         elif game_state == STATE_PAUSED:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
@@ -87,7 +94,10 @@ while running:
         player.update_animation(10, 8)
         player.draw(screen, character_frames, punch_frames)  # ✅ Fix: Pass frames here
 
-        screen.blit(enemy_sprite, (600, FLOOR_HEIGHT))  # ✅ Draw selected enemy
+        # ✅ Update and draw opponent
+        if opponent:
+            opponent.update(player.rect.x)
+            opponent.draw(screen)
 
     pygame.display.flip()
     clock.tick(60)  # Limit FPS to 60
