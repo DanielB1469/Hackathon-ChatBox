@@ -1,11 +1,7 @@
 import pygame
-
-from settings import SPEED, JUMP_FORCE, FLOOR_HEIGHT, CHAR_SIZE, SCALE
+from settings import SPEED, JUMP_FORCE, FLOOR_HEIGHT, CHAR_SIZE, SCALE, WIN_WIDTH, GRAVITY
 from assets import character_frames, punch_frames
 from audio import block_sound, punch_sound, walking_sound, landing_sound  # Import the sounds
-
-from settings import SPEED, JUMP_FORCE, FLOOR_HEIGHT, CHAR_SIZE, SCALE, WIN_WIDTH, GRAVITY
-
 
 class Player:
     def __init__(self, x, y):
@@ -15,6 +11,9 @@ class Player:
         self.moving = False
         self.animation_index = 0
         self.frame_count = 0
+        self.facing_right = True  # Track which direction the player is facing
+        self.max_health = 100  # Maximum health
+        self.health = self.max_health  # Initialize health to max health
         self.is_punching = False
         self.punch_index = 0
         self.punch_timer = 0
@@ -26,11 +25,15 @@ class Player:
         if not self.is_punching:  # Prevent movement when punching
             if keys[pygame.K_a]:  # Move left
                 self.rect.x -= SPEED
+                self.rect.x = max(0, self.rect.x)  # Prevent moving off-screen
                 self.moving = True
+                self.facing_right = False  # Correctly set facing direction
+
             if keys[pygame.K_d]:  # Move right
                 self.rect.x += SPEED
+                self.rect.x = min(WIN_WIDTH - self.rect.width, self.rect.x)  # Prevent moving off-screen
                 self.moving = True
-                self.facing_right = True  # ✅ Correctly set facing direction
+                self.facing_right = True  # Correctly set facing direction
 
         # Play walking sound when moving starts (but only once)
         if self.moving and not self.move_played:
@@ -59,7 +62,7 @@ class Player:
         self.velocity_y += GRAVITY  # Apply downward force
         self.rect.y += self.velocity_y
 
-        # ✅ Floor collision
+        # Floor collision
         if self.rect.y >= FLOOR_HEIGHT:
             self.rect.y = FLOOR_HEIGHT
             self.velocity_y = 0
@@ -87,18 +90,16 @@ class Player:
         else:
             self.animation_index = 0  # Reset to first frame when idle
 
-    def draw(self, screen):
+    def draw(self, screen, character_frames, punch_frames):
+        """Draw player sprite on screen and flip it based on direction"""
         if self.is_punching:
             sprite = punch_frames[self.punch_index]
         else:
             sprite = character_frames[self.animation_index]
 
-        # ✅ Flip sprite if facing left
+        # Flip sprite if facing left
         if not self.facing_right:
             sprite = pygame.transform.flip(sprite, True, False)
-
-        # ✅ Debugging: Print direction
-        # print("Facing Right:", self.facing_right)  # Uncomment this to check in terminal
 
         # Draw the sprite
         screen.blit(sprite, (self.rect.x, self.rect.y))
