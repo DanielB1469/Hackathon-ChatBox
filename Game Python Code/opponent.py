@@ -9,6 +9,7 @@ class Opponent:
         self.punch_timer = 0
         self.punch_count = 0
         self.punch_limit = 3  # Maximum punches in a sequence
+        self.facing_right = True  # ✅ Keeps track of opponent's direction
 
         # ✅ Health
         self.max_health = 100
@@ -35,9 +36,12 @@ class Opponent:
 
     def update(self, player_x):
         """AI Behavior: Approaches, Attacks, Retreats"""
+        # ✅ Update facing direction based on player's position
+        self.facing_right = self.rect.x < player_x
+
         if self.state == "approaching":
             if abs(self.rect.x - player_x) > self.punch_range:
-                self.rect.x += self.speed if self.rect.x < player_x else -self.speed
+                self.rect.x += self.speed if self.facing_right else -self.speed
             else:
                 self.state = "punching"
                 self.punch_timer = 30
@@ -54,7 +58,7 @@ class Opponent:
                 self.state = "retreating"
 
         elif self.state == "retreating":
-            self.rect.x += -self.speed if self.rect.x < player_x else self.speed
+            self.rect.x += -self.speed if self.facing_right else self.speed
             if abs(self.rect.x - player_x) > self.punch_range * 2:
                 self.state = "approaching"
 
@@ -65,10 +69,16 @@ class Opponent:
             self.health = 0  # Prevent health from going negative
 
     def draw(self, screen):
-        """Draws the opponent based on its current action."""
+        """Draws the opponent based on its current action, ensuring it faces the player."""
         if self.state == "punching":
-            screen.blit(self.punch_frames[self.current_frame], (self.rect.x, self.rect.y))
+            sprite = self.punch_frames[self.current_frame]
         elif self.state == "approaching" or self.state == "retreating":
-            screen.blit(self.walk_frames[self.current_frame % len(self.walk_frames)], (self.rect.x, self.rect.y))
+            sprite = self.walk_frames[self.current_frame % len(self.walk_frames)]
         else:
-            screen.blit(self.idle_frames[self.current_frame % len(self.idle_frames)], (self.rect.x, self.rect.y))
+            sprite = self.idle_frames[self.current_frame % len(self.idle_frames)]
+
+        # ✅ Flip sprite if opponent is facing left
+        if not self.facing_right:
+            sprite = pygame.transform.flip(sprite, True, False)
+
+        screen.blit(sprite, (self.rect.x, self.rect.y))

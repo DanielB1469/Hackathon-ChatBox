@@ -1,5 +1,11 @@
 import pygame
+<<<<<<< HEAD
+from settings import SPEED, JUMP_FORCE, FLOOR_HEIGHT, CHAR_SIZE, SCALE
+from assets import character_frames, punch_frames
+from audio import block_sound, punch_sound, walking_sound, landing_sound  # Import the sounds
+=======
 from settings import SPEED, JUMP_FORCE, FLOOR_HEIGHT, CHAR_SIZE, SCALE, WIN_WIDTH, GRAVITY
+>>>>>>> 656591b2005c852e58459d08af1b174a003d137e
 
 class Player:
     def __init__(self, x, y):
@@ -9,15 +15,20 @@ class Player:
         self.moving = False
         self.animation_index = 0
         self.frame_count = 0
+<<<<<<< HEAD
+=======
+        self.facing_right = True  # ✅ Track which direction the player is facing
 
         # ✅ Health
         self.max_health = 100
         self.health = self.max_health
 
         # Punch state
+>>>>>>> 656591b2005c852e58459d08af1b174a003d137e
         self.is_punching = False
         self.punch_index = 0
         self.punch_timer = 0
+        self.move_played = False  # Track if move sound has played
 
     def handle_input(self, keys):
         """Handles movement continuously while keys are held"""
@@ -25,12 +36,29 @@ class Player:
         if not self.is_punching:  # Prevent movement when punching
             if keys[pygame.K_a]:  # Move left
                 self.rect.x -= SPEED
-                self.rect.x = max(0, self.rect.x)  # ✅ Prevent moving off-screen
+<<<<<<< HEAD
                 self.moving = True
             if keys[pygame.K_d]:  # Move right
                 self.rect.x += SPEED
-                self.rect.x = min(WIN_WIDTH - self.rect.width, self.rect.x)  # ✅ Prevent moving off-screen
+=======
+                self.rect.x = max(0, self.rect.x)  # Prevent moving off-screen
                 self.moving = True
+                self.facing_right = False  # ✅ Correctly set facing direction
+
+            if keys[pygame.K_d]:  # Move right
+                self.rect.x += SPEED
+                self.rect.x = min(WIN_WIDTH - self.rect.width, self.rect.x)  # Prevent moving off-screen
+>>>>>>> 656591b2005c852e58459d08af1b174a003d137e
+                self.moving = True
+                self.facing_right = True  # ✅ Correctly set facing direction
+
+        # Play walking sound when moving starts (but only once)
+        if self.moving and not self.move_played:
+            walking_sound.stop()  # Stop any previous walking sound to avoid overlap
+            walking_sound.play()  # Play walking sound when moving
+            self.move_played = True
+        elif not self.moving:
+            self.move_played = False  # Reset to allow sound to play again when movement starts
 
     def handle_event(self, event):
         """Handle key press actions (jumping, punching)"""
@@ -39,10 +67,12 @@ class Player:
                 self.is_punching = True
                 self.punch_index = 0
                 self.punch_timer = 16
+                punch_sound.play()  # Play punch sound when punching
 
             if event.key == pygame.K_w and self.on_ground:
                 self.velocity_y = JUMP_FORCE
                 self.on_ground = False
+                landing_sound.play()  # Play landing sound when jumping
 
     def apply_gravity(self):
         """Apply gravity to player character"""
@@ -68,18 +98,32 @@ class Player:
             if self.punch_timer <= 0:
                 self.is_punching = False
             else:
-                self.punch_index = (self.punch_timer // PUNCH_ANIMATION_SPEED) % 2
+                self.punch_index = (self.punch_timer // PUNCH_ANIMATION_SPEED) % len(punch_frames)
         elif self.moving:
             self.frame_count += 1
             if self.frame_count >= ANIMATION_SPEED:
                 self.frame_count = 0
-                self.animation_index = (self.animation_index + 1) % 3
+                self.animation_index = (self.animation_index + 1) % len(character_frames)
         else:
             self.animation_index = 0  # Reset to first frame when idle
 
+<<<<<<< HEAD
+    def draw(self, screen):
+=======
     def draw(self, screen, character_frames, punch_frames):
-        """Draw player sprite on screen"""
+        """Draw player sprite on screen and flip it based on direction"""
+>>>>>>> 656591b2005c852e58459d08af1b174a003d137e
         if self.is_punching:
-            screen.blit(punch_frames[self.punch_index], (self.rect.x, self.rect.y))
+            sprite = punch_frames[self.punch_index]
         else:
-            screen.blit(character_frames[self.animation_index], (self.rect.x, self.rect.y))
+            sprite = character_frames[self.animation_index]
+
+        # ✅ Flip sprite if facing left
+        if not self.facing_right:
+            sprite = pygame.transform.flip(sprite, True, False)
+
+        # ✅ Debugging: Print direction
+        # print("Facing Right:", self.facing_right)  # Uncomment this to check in terminal
+
+        # Draw the sprite
+        screen.blit(sprite, (self.rect.x, self.rect.y))
