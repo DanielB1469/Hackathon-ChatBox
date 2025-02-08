@@ -1,13 +1,18 @@
 import pygame
-from settings import WHITE, BLACK, STATE_START, STATE_SELECT, STATE_PAUSED, STATE_PLAYING
+from settings import WHITE, BLACK
+
+# ✅ Load the start screen image
+start_screen_image = pygame.image.load("StartingScreen.webp")  
+start_screen_image = pygame.transform.scale(start_screen_image, (800, 600))  # Adjust to match window size
 
 def draw_start_screen(screen, font):
-    screen.fill(BLACK)
-    title = font.render("AI Boxing Game", True, WHITE)
-    prompt = font.render("Press ENTER to Start", True, WHITE)
-    screen.blit(title, (300, 200))
-    screen.blit(prompt, (270, 300))
+    """Draws the start screen with an image background"""
+    screen.blit(start_screen_image, (0, 0))  # ✅ Display the background image
+
+
+
     pygame.display.flip()
+
 
 def draw_select_screen(screen, font, enemies, selected_index):
     screen.fill(BLACK)

@@ -1,6 +1,5 @@
 import pygame
-from settings import SPEED, JUMP_FORCE, FLOOR_HEIGHT, CHAR_SIZE, SCALE
-from assets import character_frames, punch_frames
+from settings import SPEED, JUMP_FORCE, FLOOR_HEIGHT, CHAR_SIZE, SCALE, WIN_WIDTH
 
 class Player:
     def __init__(self, x, y):
@@ -23,9 +22,14 @@ class Player:
         if not self.is_punching:  # Prevent movement when punching
             if keys[pygame.K_a]:  # Move left
                 self.rect.x -= SPEED
+                if self.rect.x < 0:  # ✅ Prevent moving past left boundary
+                    self.rect.x = 0
                 self.moving = True
+
             if keys[pygame.K_d]:  # Move right
                 self.rect.x += SPEED
+                if self.rect.x > WIN_WIDTH - self.rect.width:  # ✅ Prevent moving past right boundary
+                    self.rect.x = WIN_WIDTH - self.rect.width
                 self.moving = True
 
     def handle_event(self, event):
@@ -56,16 +60,16 @@ class Player:
             if self.punch_timer <= 0:
                 self.is_punching = False
             else:
-                self.punch_index = (self.punch_timer // PUNCH_ANIMATION_SPEED) % len(punch_frames)
+                self.punch_index = (self.punch_timer // PUNCH_ANIMATION_SPEED) % 2
         elif self.moving:
             self.frame_count += 1
             if self.frame_count >= ANIMATION_SPEED:
                 self.frame_count = 0
-                self.animation_index = (self.animation_index + 1) % len(character_frames)
+                self.animation_index = (self.animation_index + 1) % 3
         else:
             self.animation_index = 0  # Reset to first frame when idle
 
-    def draw(self, screen):
+    def draw(self, screen, character_frames, punch_frames):
         if self.is_punching:
             screen.blit(punch_frames[self.punch_index], (self.rect.x, self.rect.y))
         else:

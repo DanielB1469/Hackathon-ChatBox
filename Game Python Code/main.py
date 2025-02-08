@@ -2,7 +2,7 @@ import pygame
 from settings import *
 from player import Player
 from ui_screens import draw_start_screen, draw_select_screen, draw_pause_screen
-from assets import enemy_sprites
+from assets import enemy_sprites, character_frames, punch_frames
 
 # Initialize pygame
 pygame.init()
@@ -90,7 +90,7 @@ while running:
 
     # **MENU SCREENS**
     if game_state == STATE_START:
-        draw_start_screen(screen, font)
+        draw_start_screen(screen, font)  # ✅ Now shows background image
 
     elif game_state == STATE_SELECT:
         draw_select_screen(screen, font, enemy_names, selected_enemy_index)
@@ -102,7 +102,7 @@ while running:
         player.handle_input(keys)  # ✅ Allows smooth movement in-game
         player.apply_gravity(GRAVITY)
         player.update_animation(10, 8)
-        player.draw(screen)
+        player.draw(screen, character_frames, punch_frames)  # ✅ Fix: Pass frames here
 
         screen.blit(enemy_sprite, (600, FLOOR_HEIGHT))  # Draw selected enemy
 
