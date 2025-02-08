@@ -1,4 +1,8 @@
 import pygame
+from settings import *
+from player import Player
+from ui_screens import draw_start_screen, draw_select_screen, draw_pause_screen
+from assets import enemy_sprites
 
 # Initialize pygame
 pygame.init()
@@ -20,120 +24,89 @@ GRAVITY = 0.8
 JUMP_FORCE = -12
 SPEED = 5
 ANIMATION_SPEED = 10  # Adjust walking animation speed
-PUNCH_ANIMATION_SPEED = 16  # Speed of punch animation
+PUNCH_ANIMATION_SPEED = 8  # Speed of punch animation
 PUNCH_DURATION = 16  # How long the punch lasts
 
 # Setup the window
 screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-pygame.display.set_caption("Pygame Platformer")
+pygame.display.set_caption("AI Boxing Game")
 
-# Load character animation frames
-character_frames = [
-    pygame.transform.scale(pygame.image.load("SpriteWalking1.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
-    pygame.transform.scale(pygame.image.load("SpriteWalking2.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
-    pygame.transform.scale(pygame.image.load("SpriteWalking3.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
-]
+# Game state
+game_state = STATE_START
 
-# Load punch animation frames
-punch_frames = [
-    pygame.transform.scale(pygame.image.load("SpritePunch1.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
-    pygame.transform.scale(pygame.image.load("SpritePunch2.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
-]
+# Load font
+font = pygame.font.Font(None, 40)
 
-# Character properties
-character = pygame.Rect(100, FLOOR_HEIGHT, CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)
-velocity_y = 0
-on_ground = False
-moving = False
-animation_index = 0
-frame_count = 0
+# Enemy Selection Variables
+enemy_names = list(enemy_sprites.keys())
+selected_enemy_index = 0
+can_navigate = True  # Prevent holding navigation keys in menus
 
-# Punch state
-is_punching = False
-punch_index = 0
-punch_timer = 0
+# Create player
+player = Player(100, FLOOR_HEIGHT)
 
-# Game loop
 running = True
 clock = pygame.time.Clock()
 
 while running:
-    clock.tick(60)  # 60 FPS
-    
-    # Event Handling
+    screen.fill(GRAY)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    
-    # Get key presses
+
+        # **MENU NAVIGATION (KEYDOWN ONLY)**
+        if game_state == STATE_START:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:  
+                game_state = STATE_SELECT
+
+        elif game_state == STATE_SELECT:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_DOWN and can_navigate:
+                    selected_enemy_index = (selected_enemy_index + 1) % len(enemy_names)
+                    can_navigate = False
+                if event.key == pygame.K_UP and can_navigate:
+                    selected_enemy_index = (selected_enemy_index - 1) % len(enemy_names)
+                    can_navigate = False
+                if event.key == pygame.K_RETURN:
+                    enemy_name = enemy_names[selected_enemy_index]
+                    enemy_sprite = enemy_sprites[enemy_name]
+                    game_state = STATE_PLAYING
+
+        elif game_state == STATE_PAUSED:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                game_state = STATE_PLAYING
+
+        elif game_state == STATE_PLAYING:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                game_state = STATE_PAUSED
+            player.handle_event(event)
+
+        # **Reset Menu Navigation Delay**
+        if event.type == pygame.KEYUP:
+            can_navigate = True  # Allows another selection after releasing key
+
     keys = pygame.key.get_pressed()
-    
-    # Handle punch input
-    if keys[pygame.K_SPACE] and not is_punching:
-        is_punching = True
-        punch_index = 0
-        punch_timer = PUNCH_DURATION
 
-    # Movement logic
-    moving = False
-    if keys[pygame.K_a] and not is_punching:  # Prevent movement during punch
-        character.x -= SPEED
-        moving = True
-    if keys[pygame.K_d] and not is_punching:  # Prevent movement during punch
-        character.x += SPEED
-        moving = True
+    # **MENU SCREENS**
+    if game_state == STATE_START:
+        draw_start_screen(screen, font)
 
-    # Jumping
-    if keys[pygame.K_w] and on_ground:
-        velocity_y = JUMP_FORCE
-        on_ground = False
-    
-    # Apply gravity
-    velocity_y += GRAVITY
-    character.y += velocity_y
+    elif game_state == STATE_SELECT:
+        draw_select_screen(screen, font, enemy_names, selected_enemy_index)
 
-    # Floor collision
-    if character.y >= FLOOR_HEIGHT:
-        character.y = FLOOR_HEIGHT
-        velocity_y = 0
-        on_ground = True
+    elif game_state == STATE_PAUSED:
+        draw_pause_screen(screen, font)
 
-    # Keep character within screen bounds
-    if character.x < 0:
-        character.x = 0
-    if character.x > WIN_WIDTH - character.width:
-        character.x = WIN_WIDTH - character.width
+    elif game_state == STATE_PLAYING:
+        player.handle_input(keys)  # ✅ Allows smooth movement in-game
+        player.apply_gravity(GRAVITY)
+        player.update_animation(10, 8)
+        player.draw(screen)
 
-    # Handle animation
-    if is_punching:
-        punch_timer -= 1
-        if punch_timer <= 0:
-            is_punching = False
-        else:
-            # Swap between the two punch frames
-            if punch_timer % PUNCH_ANIMATION_SPEED < PUNCH_ANIMATION_SPEED // 2:
-                punch_index = 0
-            else:
-                punch_index = 1
-    elif moving:
-        frame_count += 1
-        if frame_count >= ANIMATION_SPEED:
-            frame_count = 0
-            animation_index = (animation_index + 1) % len(character_frames)
-    else:
-        animation_index = 0  # Reset to first frame when idle
+        screen.blit(enemy_sprite, (600, FLOOR_HEIGHT))  # Draw selected enemy
 
-    # Drawing
-    screen.fill(GRAY)  # Background color
-    pygame.draw.rect(screen, BLACK, (0, FLOOR_HEIGHT + CHAR_SIZE * SCALE, WIN_WIDTH, CHAR_SIZE * SCALE))  # Floor
-    
-    # Display the correct animation frame
-    if is_punching:
-        screen.blit(punch_frames[punch_index], (character.x, character.y))
-    else:
-        screen.blit(character_frames[animation_index], (character.x, character.y))
-
-    # Update display
     pygame.display.flip()
+    clock.tick(60)  # Limit FPS to 60
 
 pygame.quit()
