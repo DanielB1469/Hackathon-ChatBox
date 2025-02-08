@@ -20,7 +20,7 @@ GRAVITY = 0.8
 JUMP_FORCE = -12
 SPEED = 5
 ANIMATION_SPEED = 10  # Adjust walking animation speed
-PUNCH_ANIMATION_SPEED = 8  # Speed of punch animation
+PUNCH_ANIMATION_SPEED = 16  # Speed of punch animation
 PUNCH_DURATION = 16  # How long the punch lasts
 
 # Setup the window
