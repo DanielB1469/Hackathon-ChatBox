@@ -10,26 +10,25 @@ pygame.init()
 # Constants
 CHAR_SIZE = 32  # Character size (assumed to be 32x32)
 SCALE = 4  # Scaling factor for visibility
-WIN_WIDTH = CHAR_SIZE * 20  # 20 tiles wide
+WIN_WIDTH = CHAR_SIZE * 30  # 20 tiles wide
 WIN_HEIGHT = CHAR_SIZE * 15  # 15 tiles high
 FLOOR_HEIGHT = WIN_HEIGHT - CHAR_SIZE * 4  # Floor Y position
-
-# Colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GRAY = (100, 100, 100)
 
 # Physics
 GRAVITY = 0.8
 JUMP_FORCE = -12
 SPEED = 5
-ANIMATION_SPEED = 10  # Adjust walking animation speed
-PUNCH_ANIMATION_SPEED = 8  # Speed of punch animation
+ANIMATION_SPEED = 10  # Walking animation speed
+PUNCH_ANIMATION_SPEED = 8  # Punch animation speed
 PUNCH_DURATION = 16  # How long the punch lasts
 
 # Setup the window
 screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("AI Boxing Game")
+
+# Load background image and scale it to window size
+background = pygame.image.load("BoxingRing.png")
+background = pygame.transform.scale(background, (WIN_WIDTH, WIN_HEIGHT))
 
 # Game state
 game_state = STATE_START
@@ -49,7 +48,8 @@ running = True
 clock = pygame.time.Clock()
 
 while running:
-    screen.fill(GRAY)
+    # **Draw Background First**
+    screen.blit(background, (0, 0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
