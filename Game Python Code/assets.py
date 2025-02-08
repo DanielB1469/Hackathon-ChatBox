@@ -16,7 +16,7 @@ punch_frames = [
 # Load enemy sprites
 enemy_sprites = {
     "Charles Mada": pygame.transform.scale(pygame.image.load("Sprite-0001.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
-    "Raghav Sureshbabu": pygame.transform.scale(pygame.image.load("Sprite-0001.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
+    "Raghav Sureshbabu": pygame.transform.scale(pygame.image.load("RagPunch1.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
     "Danny Berry": pygame.transform.scale(pygame.image.load("Sprite-0001.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
     "Alok Sinha": pygame.transform.scale(pygame.image.load("Sprite-0001.png"), (CHAR_SIZE * SCALE, CHAR_SIZE * SCALE)),
 
