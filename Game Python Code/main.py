@@ -2,32 +2,10 @@ import pygame
 from settings import *
 from player import Player
 from ui_screens import draw_start_screen, draw_select_screen, draw_pause_screen
-from assets import enemy_sprites
+from assets import enemy_sprites, character_frames, punch_frames
 
 # Initialize pygame
 pygame.init()
-
-# Constants
-CHAR_SIZE = 32  # Character size (assumed to be 32x32)
-SCALE = 4  # Scaling factor for visibility
-WIN_WIDTH = CHAR_SIZE * 20  # 20 tiles wide
-WIN_HEIGHT = CHAR_SIZE * 15  # 15 tiles high
-FLOOR_HEIGHT = WIN_HEIGHT - CHAR_SIZE * 4  # Floor Y position
-
-# Colors
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GRAY = (100, 100, 100)
-
-# Physics
-GRAVITY = 0.8
-JUMP_FORCE = -12
-SPEED = 5
-ANIMATION_SPEED = 10  # Adjust walking animation speed
-PUNCH_ANIMATION_SPEED = 8  # Speed of punch animation
-PUNCH_DURATION = 16  # How long the punch lasts
-
-# Setup the window
 screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("AI Boxing Game")
 
@@ -90,7 +68,7 @@ while running:
 
     # **MENU SCREENS**
     if game_state == STATE_START:
-        draw_start_screen(screen, font)
+        draw_start_screen(screen, font)  # ✅ Now shows background image
 
     elif game_state == STATE_SELECT:
         draw_select_screen(screen, font, enemy_names, selected_enemy_index)
@@ -102,7 +80,7 @@ while running:
         player.handle_input(keys)  # ✅ Allows smooth movement in-game
         player.apply_gravity(GRAVITY)
         player.update_animation(10, 8)
-        player.draw(screen)
+        player.draw(screen, character_frames, punch_frames)  # ✅ Fix: Pass frames here
 
         screen.blit(enemy_sprite, (600, FLOOR_HEIGHT))  # Draw selected enemy
 
