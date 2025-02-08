@@ -1,5 +1,5 @@
 import pygame
-from settings import SPEED, JUMP_FORCE, FLOOR_HEIGHT, CHAR_SIZE, SCALE, WIN_WIDTH
+from settings import SPEED, JUMP_FORCE, FLOOR_HEIGHT, CHAR_SIZE, SCALE, WIN_WIDTH, GRAVITY
 
 class Player:
     def __init__(self, x, y):
@@ -10,6 +10,10 @@ class Player:
         self.animation_index = 0
         self.frame_count = 0
 
+        # ✅ Health
+        self.max_health = 100
+        self.health = self.max_health
+
         # Punch state
         self.is_punching = False
         self.punch_index = 0
@@ -18,22 +22,18 @@ class Player:
     def handle_input(self, keys):
         """Handles movement continuously while keys are held"""
         self.moving = False
-
         if not self.is_punching:  # Prevent movement when punching
             if keys[pygame.K_a]:  # Move left
                 self.rect.x -= SPEED
-                if self.rect.x < 0:  # ✅ Prevent moving past left boundary
-                    self.rect.x = 0
+                self.rect.x = max(0, self.rect.x)  # ✅ Prevent moving off-screen
                 self.moving = True
-
             if keys[pygame.K_d]:  # Move right
                 self.rect.x += SPEED
-                if self.rect.x > WIN_WIDTH - self.rect.width:  # ✅ Prevent moving past right boundary
-                    self.rect.x = WIN_WIDTH - self.rect.width
+                self.rect.x = min(WIN_WIDTH - self.rect.width, self.rect.x)  # ✅ Prevent moving off-screen
                 self.moving = True
 
     def handle_event(self, event):
-        """Handle key press actions (punching and jumping)"""
+        """Handle key press actions (jumping, punching)"""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and not self.is_punching:
                 self.is_punching = True
@@ -44,17 +44,25 @@ class Player:
                 self.velocity_y = JUMP_FORCE
                 self.on_ground = False
 
-    def apply_gravity(self, gravity):
-        self.velocity_y += gravity
+    def apply_gravity(self):
+        """Apply gravity to player character"""
+        self.velocity_y += GRAVITY  # Apply downward force
         self.rect.y += self.velocity_y
 
-        # Floor collision
+        # ✅ Floor collision
         if self.rect.y >= FLOOR_HEIGHT:
             self.rect.y = FLOOR_HEIGHT
             self.velocity_y = 0
             self.on_ground = True
 
+    def take_damage(self, amount):
+        """Reduce health when hit"""
+        self.health -= amount
+        if self.health < 0:
+            self.health = 0  # Prevent health from going negative
+
     def update_animation(self, ANIMATION_SPEED, PUNCH_ANIMATION_SPEED):
+        """Handles animation updates for movement and punching"""
         if self.is_punching:
             self.punch_timer -= 1
             if self.punch_timer <= 0:
@@ -70,6 +78,7 @@ class Player:
             self.animation_index = 0  # Reset to first frame when idle
 
     def draw(self, screen, character_frames, punch_frames):
+        """Draw player sprite on screen"""
         if self.is_punching:
             screen.blit(punch_frames[self.punch_index], (self.rect.x, self.rect.y))
         else:
