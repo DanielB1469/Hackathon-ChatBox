@@ -9,6 +9,7 @@ class Player:
         self.moving = False
         self.animation_index = 0
         self.frame_count = 0
+        self.facing_right = True  # ✅ Track which direction the player is facing
 
         # ✅ Health
         self.max_health = 100
@@ -25,12 +26,15 @@ class Player:
         if not self.is_punching:  # Prevent movement when punching
             if keys[pygame.K_a]:  # Move left
                 self.rect.x -= SPEED
-                self.rect.x = max(0, self.rect.x)  # ✅ Prevent moving off-screen
+                self.rect.x = max(0, self.rect.x)  # Prevent moving off-screen
                 self.moving = True
+                self.facing_right = False  # ✅ Correctly set facing direction
+
             if keys[pygame.K_d]:  # Move right
                 self.rect.x += SPEED
-                self.rect.x = min(WIN_WIDTH - self.rect.width, self.rect.x)  # ✅ Prevent moving off-screen
+                self.rect.x = min(WIN_WIDTH - self.rect.width, self.rect.x)  # Prevent moving off-screen
                 self.moving = True
+                self.facing_right = True  # ✅ Correctly set facing direction
 
     def handle_event(self, event):
         """Handle key press actions (jumping, punching)"""
@@ -78,8 +82,18 @@ class Player:
             self.animation_index = 0  # Reset to first frame when idle
 
     def draw(self, screen, character_frames, punch_frames):
-        """Draw player sprite on screen"""
+        """Draw player sprite on screen and flip it based on direction"""
         if self.is_punching:
-            screen.blit(punch_frames[self.punch_index], (self.rect.x, self.rect.y))
+            sprite = punch_frames[self.punch_index]
         else:
-            screen.blit(character_frames[self.animation_index], (self.rect.x, self.rect.y))
+            sprite = character_frames[self.animation_index]
+
+        # ✅ Flip sprite if facing left
+        if not self.facing_right:
+            sprite = pygame.transform.flip(sprite, True, False)
+
+        # ✅ Debugging: Print direction
+        # print("Facing Right:", self.facing_right)  # Uncomment this to check in terminal
+
+        # Draw the sprite
+        screen.blit(sprite, (self.rect.x, self.rect.y))
