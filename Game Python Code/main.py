@@ -73,6 +73,7 @@ def check_game_over():
         current_round += 1
         if opponent_round_wins >= 3:
             game_state = STATE_GAME_OVER
+            current_round=1
         else:
             game_state = STATE_ROUND_LOSE
 
@@ -82,6 +83,7 @@ def check_game_over():
         current_round += 1
         if player_round_wins >= 3:
             game_state = STATE_GAME_OVER
+            current_round=1
         else:
             game_state = STATE_ROUND_WIN
 
