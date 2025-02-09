@@ -6,8 +6,10 @@ from ui_screens import (
     draw_start_screen,
     draw_select_screen,
     draw_pause_screen,
-    draw_win_screen,
-    draw_lose_screen
+    draw_round_win_screen,
+    draw_round_lose_screen,
+    draw_final_win_screen,
+    draw_final_lose_screen
 )
 from assets import enemy_sprites, character_frames, punch_frames
 
@@ -27,46 +29,63 @@ game_state = STATE_START
 font = pygame.font.Font(None, 40)
 
 # ✅ Enemy Selection Variables
-enemy_names = list(enemy_sprites.keys())
+enemy_names = list(OPPONENTS.keys())  # ✅ Load enemy names dynamically
 selected_enemy_index = 0
-can_navigate = True  # Prevent holding navigation keys in menus
-enemy_name = "Opponent"  # Default opponent name
+enemy_name = enemy_names[selected_enemy_index]  # ✅ Set default opponent
 
 # ✅ Create player and opponent
 player = Player(100, FLOOR_HEIGHT)
-opponent = Opponent(600, FLOOR_HEIGHT, speed=2, punch_range=100)
+
+# ✅ Opponent stats (assigned after selection)
+opponent_stats = OPPONENTS[enemy_name]  # Default to first opponent
+opponent = Opponent(600, FLOOR_HEIGHT, speed=opponent_stats["speed"], punch_range=100, punch_damage=opponent_stats["punch_damage"])
+
+# ✅ Round Tracking
+player_round_wins = 0
+opponent_round_wins = 0
+TOTAL_ROUNDS = 3
+current_round = 1
 
 # ✅ Function to draw labeled health bars
 def draw_health_bars(screen, player, opponent, opponent_name):
     """Draws labeled health bars for player and opponent"""
-    font = pygame.font.Font(None, 36)  # ✅ Set font for labels
+    font = pygame.font.Font(None, 36)
 
-    # ✅ Player Health Bar (Labeled "You")
+    # ✅ Player Health Bar
     pygame.draw.rect(screen, (255, 0, 0), (50, 30, 400, 20))  # Background
     pygame.draw.rect(screen, (0, 255, 0), (50, 30, 400 * (player.health / player.max_health), 20))  # Health
-    player_label = font.render("You", True, (255, 255, 255))  # ✅ Label "You"
+    player_label = font.render("You", True, (255, 255, 255))
     screen.blit(player_label, (50, 5))  # Position label above health bar
 
-    # ✅ Opponent Health Bar (Labeled with Name)
+    # ✅ Opponent Health Bar
     pygame.draw.rect(screen, (255, 0, 0), (550, 30, 400, 20))  # Background
     pygame.draw.rect(screen, (0, 255, 0), (550, 30, 400 * (opponent.health / opponent.max_health), 20))  # Health
-    enemy_label = font.render(opponent_name, True, (255, 255, 255))  # ✅ Label with enemy's name
+    enemy_label = font.render(opponent_name, True, (255, 255, 255))
     screen.blit(enemy_label, (550, 5))  # Position label above health bar
 
 # ✅ Function to check game over
 def check_game_over():
-    global game_state
+    global game_state, player_round_wins, opponent_round_wins, current_round
+
     if player.health <= 0:
-        print("Game Over! You lost!")
-        game_state = STATE_LOSE  # ✅ Now switches to lose screen
-        player.health=100
-        opponent.health=100
+        print(f"You lost Round {current_round}!")
+        opponent_round_wins += 1
+        current_round += 1
+        if opponent_round_wins >= 3:
+            game_state = STATE_GAME_OVER
+            current_round=1
+        else:
+            game_state = STATE_ROUND_LOSE
 
     elif opponent.health <= 0:
-        print("You won the fight!")
-        game_state = STATE_WIN  # ✅ Now switches to win screen
-        player.health=100
-        opponent.health=100
+        print(f"You won Round {current_round}!")
+        player_round_wins += 1
+        current_round += 1
+        if player_round_wins >= 3:
+            game_state = STATE_GAME_OVER
+            current_round=1
+        else:
+            game_state = STATE_ROUND_WIN
 
 # ✅ Main game loop
 running = True
@@ -81,7 +100,7 @@ while running:
 
         # **Start Screen Logic**
         if game_state == STATE_START:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:  
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 game_state = STATE_SELECT
 
         # **Selection Screen Logic**
@@ -92,8 +111,9 @@ while running:
                 if event.key == pygame.K_UP:
                     selected_enemy_index = (selected_enemy_index - 1) % len(enemy_names)
                 if event.key == pygame.K_RETURN:
-                    enemy_name = enemy_names[selected_enemy_index]  # ✅ Get selected opponent name
-                    opponent = Opponent(600, FLOOR_HEIGHT, speed=2, punch_range=100)  # ✅ Reset opponent
+                    enemy_name = enemy_names[selected_enemy_index]
+                    opponent_stats = OPPONENTS[enemy_name]
+                    opponent = Opponent(600, FLOOR_HEIGHT, speed=opponent_stats["speed"], punch_range=100, punch_damage=opponent_stats["punch_damage"])
                     game_state = STATE_PLAYING
 
         # **Pause Screen Logic**
@@ -101,17 +121,36 @@ while running:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 game_state = STATE_PLAYING
 
-        # **Win/Lose Handling**
-        elif game_state in [STATE_WIN, STATE_LOSE]:
+        # **Round Win Screen**
+        elif game_state == STATE_ROUND_WIN:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                print(f"Starting Round {current_round}...")
+                player.health = player.max_health
+                opponent.health = opponent.max_health
+                game_state = STATE_PLAYING
+
+        # **Round Lose Screen**
+        elif game_state == STATE_ROUND_LOSE:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                print(f"Starting Round {current_round}...")
+                player.health = player.max_health
+                opponent.health = opponent.max_health
+                game_state = STATE_PLAYING
+
+        # **Final Game Over Screen**
+        elif game_state == STATE_GAME_OVER:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r:  # ✅ Restart the match
-                    print("Restarting Match...")  # ✅ Debugging
+                if event.key == pygame.K_r:
+                    print("Restarting Best-of-Three Match...")
+                    player_round_wins = 0
+                    opponent_round_wins = 0
+                    current_round = 1
                     player.health = player.max_health
                     opponent.health = opponent.max_health
                     game_state = STATE_PLAYING
 
-                if event.key == pygame.K_j:  # ✅ Go back to character select
-                    print("Returning to Character Select...")  # ✅ Debugging
+                if event.key == pygame.K_j:
+                    print("Returning to Character Select...")
                     game_state = STATE_SELECT
 
         # **Game Playing Logic**
@@ -129,10 +168,15 @@ while running:
         draw_select_screen(screen, font, enemy_names, selected_enemy_index)
     elif game_state == STATE_PAUSED:
         draw_pause_screen(screen, font)
-    elif game_state == STATE_WIN:
-        draw_win_screen(screen, font)
-    elif game_state == STATE_LOSE:
-        draw_lose_screen(screen, font)
+    elif game_state == STATE_ROUND_WIN:
+        draw_round_win_screen(screen, font, current_round)
+    elif game_state == STATE_ROUND_LOSE:
+        draw_round_lose_screen(screen, font, current_round)
+    elif game_state == STATE_GAME_OVER:
+        if player_round_wins > opponent_round_wins:
+            draw_final_win_screen(screen, font)
+        else:
+            draw_final_lose_screen(screen, font)
     elif game_state == STATE_PLAYING:
         screen.blit(game_background, (0, 0))
 
@@ -146,7 +190,7 @@ while running:
         opponent.update(player.rect.x)
         opponent.draw(screen)
 
-        # ✅ Draw labeled health bars
+        # ✅ Draw Health Bars
         draw_health_bars(screen, player, opponent, enemy_name)
 
         # ✅ Attack Logic
@@ -154,12 +198,12 @@ while running:
             opponent.take_damage(5)
 
         if opponent.state == "punching" and abs(player.rect.x - opponent.rect.x) < 50:
-            player.take_damage(5)
+            player.take_damage(opponent.punch_damage)
 
         # ✅ Check for game over
         check_game_over()
 
     pygame.display.flip()
-    clock.tick(60)  # Limit FPS to 60
+    clock.tick(60)
 
 pygame.quit()

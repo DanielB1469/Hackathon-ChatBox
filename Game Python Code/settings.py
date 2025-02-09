@@ -1,4 +1,12 @@
 # settings.py
+# ✅ Define Opponents with Different Stats
+OPPONENTS = {
+    "Charles Mada": {"speed": 10, "punch_damage": 1},
+    "Raghav Sureshbabu": {"speed": 1, "punch_damage": 10},
+    "Danny Berry": {"speed": 5, "punch_damage": 6},
+    "Alok Sinha": {"speed": 6, "punch_damage": 5}
+}
+
 
 # Constants
 CHAR_SIZE = 32
@@ -20,12 +28,15 @@ ANIMATION_SPEED = 10
 PUNCH_ANIMATION_SPEED = 8
 PUNCH_DURATION = 16
 
-# Game States
 # ✅ Define Game States
 STATE_START = "start"
 STATE_SELECT = "select"
 STATE_PLAYING = "playing"
 STATE_PAUSED = "paused"
-STATE_WIN = "win"  # ✅ Add this
-STATE_LOSE = "lose"  # ✅ Add this
+STATE_WIN = "win"
+STATE_LOSE = "lose"
+STATE_ROUND_WIN = "round_win"
+STATE_ROUND_LOSE = "round_lose"
+STATE_GAME_OVER = "game_over"  # ✅ Final winner is determined here
+
 

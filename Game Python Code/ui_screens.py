@@ -15,6 +15,9 @@ lose_screen_image = pygame.transform.scale(lose_screen_image, (1200, 600))
 win_screen_image = pygame.image.load("win_screen.jpg")  
 win_screen_image = pygame.transform.scale(win_screen_image, (1200, 600))
 
+pause_screen_image= pygame.image.load("pause_screen.jpg")  
+pause_screen_image = pygame.transform.scale(pause_screen_image, (1200, 600))
+
 
 def draw_start_screen(screen, font):
     """Draws the start screen with a unique background and fading text"""
@@ -57,32 +60,47 @@ def draw_pause_screen(screen, font):
     pygame.display.flip()
 
 
-def draw_win_screen(screen, font):
-    """Draws the win screen with retry and character select options"""
-    screen.blit(win_screen_image, (0, 0))  # ✅ Background for win screen
-
-    text = font.render("You Win!", True, WHITE)
-    retry_text = font.render("Press R to Retry", True, WHITE)
-    select_text = font.render("Press J to Character Select", True, WHITE)
+def draw_round_win_screen(screen, font, current_round):
+    """Draws the round win screen"""
+    screen.fill((0, 0, 0))  # ✅ Black background
+    text = font.render(f"Round {current_round - 1} Won!", True, (255, 255, 255))
+    continue_text = font.render("Press ENTER to Continue", True, (255, 255, 255))
 
     screen.blit(text, (450, 200))
-    screen.blit(retry_text, (450, 300))
-    screen.blit(select_text, (450, 350))
-
+    screen.blit(continue_text, (450, 300))
     pygame.display.flip()
 
-
-def draw_lose_screen(screen, font):
-    """Draws the lose screen with retry and character select options"""
-    screen.blit(lose_screen_image, (0, 0))  # ✅ Background for lose screen
-
-    text = font.render("You Lose!", True, WHITE)
-    retry_text = font.render("Press R to Retry", True, WHITE)
-    select_text = font.render("Press J to Character Select", True, WHITE)
+def draw_round_lose_screen(screen, font, current_round):
+    """Draws the round lose screen"""
+    screen.fill((0, 0, 0))  # ✅ Black background
+    text = font.render(f"Round {current_round - 1} Lost!", True, (255, 255, 255))
+    continue_text = font.render("Press ENTER to Continue", True, (255, 255, 255))
 
     screen.blit(text, (450, 200))
-    screen.blit(retry_text, (450, 300))
-    screen.blit(select_text, (450, 350))
+    screen.blit(continue_text, (450, 300))
+    pygame.display.flip()
 
+def draw_final_win_screen(screen, font):
+    """Draws the final win screen"""
+    screen.blit(win_screen_image, (0, 0))  # ✅ Background for selection
+    text = font.render("You Won the Match!", True, (255, 255, 255))
+    restart_text = font.render("Press R to Restart", True, (255, 255, 255))
+    select_text = font.render("Press J to Character Select", True, (255, 255, 255))
+
+    screen.blit(text, (450, 200))
+    screen.blit(restart_text, (450, 300))
+    screen.blit(select_text, (450, 350))
+    pygame.display.flip()
+
+def draw_final_lose_screen(screen, font):
+    """Draws the final lose screen"""
+    screen.blit(lose_screen_image, (0, 0))  # ✅ Background for selection
+    text = font.render("You Lost the Match!", True, (255, 255, 255))
+    restart_text = font.render("Press R to Restart", True, (255, 255, 255))
+    select_text = font.render("Press J to Character Select", True, (255, 255, 255))
+
+    screen.blit(text, (450, 200))
+    screen.blit(restart_text, (450, 300))
+    screen.blit(select_text, (450, 350))
     pygame.display.flip()
 
