@@ -29,13 +29,16 @@ game_state = STATE_START
 font = pygame.font.Font(None, 40)
 
 # ✅ Enemy Selection Variables
-enemy_names = list(enemy_sprites.keys())
+enemy_names = list(OPPONENTS.keys())  # ✅ Load enemy names dynamically
 selected_enemy_index = 0
-enemy_name = "Opponent"
+enemy_name = enemy_names[selected_enemy_index]  # ✅ Set default opponent
 
 # ✅ Create player and opponent
 player = Player(100, FLOOR_HEIGHT)
-opponent = Opponent(600, FLOOR_HEIGHT, speed=2, punch_range=100)
+
+# ✅ Opponent stats (assigned after selection)
+opponent_stats = OPPONENTS[enemy_name]  # Default to first opponent
+opponent = Opponent(600, FLOOR_HEIGHT, speed=opponent_stats["speed"], punch_range=100, punch_damage=opponent_stats["punch_damage"])
 
 # ✅ Round Tracking
 player_round_wins = 0
@@ -107,7 +110,8 @@ while running:
                     selected_enemy_index = (selected_enemy_index - 1) % len(enemy_names)
                 if event.key == pygame.K_RETURN:
                     enemy_name = enemy_names[selected_enemy_index]
-                    opponent = Opponent(600, FLOOR_HEIGHT, speed=2, punch_range=100)
+                    opponent_stats = OPPONENTS[enemy_name]
+                    opponent = Opponent(600, FLOOR_HEIGHT, speed=opponent_stats["speed"], punch_range=100, punch_damage=opponent_stats["punch_damage"])
                     game_state = STATE_PLAYING
 
         # **Pause Screen Logic**
@@ -192,7 +196,7 @@ while running:
             opponent.take_damage(5)
 
         if opponent.state == "punching" and abs(player.rect.x - opponent.rect.x) < 50:
-            player.take_damage(5)
+            player.take_damage(opponent.punch_damage)
 
         # ✅ Check for game over
         check_game_over()

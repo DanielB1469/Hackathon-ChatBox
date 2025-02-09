@@ -1,4 +1,12 @@
 # settings.py
+# ✅ Define Opponents with Different Stats
+OPPONENTS = {
+    "Charles Mada": {"speed": 10, "punch_damage": 1},
+    "Raghav Sureshbabu": {"speed": 1, "punch_damage": 10},
+    "Danny Berry": {"speed": 5, "punch_damage": 6},
+    "Alok Sinha": {"speed": 6, "punch_damage": 5}
+}
+
 
 # Constants
 CHAR_SIZE = 32
