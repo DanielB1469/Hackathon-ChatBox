@@ -53,9 +53,13 @@ def check_game_over():
     if player.health <= 0:
         print("Game Over! You lost!")
         game_state = STATE_START  # Restart game on loss
+        opponent.health=100
+        player.health=100
     elif opponent.health <= 0:
         print("You won the fight!")
         game_state = STATE_START  # Restart game on win
+        opponent.health=100
+        player.health=100
 
 # ✅ Main game loop
 running = True
