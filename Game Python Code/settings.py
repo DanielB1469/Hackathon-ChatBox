@@ -21,12 +21,12 @@ BLACK = (0, 0, 0)
 GRAY = (100, 100, 100)
 
 # Physics & Movement
-GRAVITY = 0.7
+GRAVITY = 0.3
 JUMP_FORCE = -12
 SPEED = 5  # <---- ✅ Add this line
 ANIMATION_SPEED = 10
 PUNCH_ANIMATION_SPEED = 8
-PUNCH_DURATION = 16
+PUNCH_DURATION = 8
 
 # ✅ Define Game States
 STATE_START = "start"

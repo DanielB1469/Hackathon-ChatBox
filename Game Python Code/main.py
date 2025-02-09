@@ -11,10 +11,17 @@ from ui_screens import (
     draw_final_win_screen,
     draw_final_lose_screen
 )
-from assets import enemy_sprites, character_frames, punch_frames
+from assets import character_frames, punch_frames, OPPONENT_SPRITES  # ✅ Import character & opponent sprites
 
 # ✅ Initialize pygame
 pygame.init()
+pygame.mixer.init()  # ✅ Initialize sound system
+
+# ✅ Load Intro Music
+pygame.mixer.music.load("drugs_over_love _{.mp3")  # ✅ Ensure this file exists
+pygame.mixer.music.set_volume(0.5)  # ✅ Adjust volume (0.0 - 1.0)
+pygame.mixer.music.play(-1)  # ✅ Loop the intro music indefinitely
+
 screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("AI Boxing Game")
 
@@ -29,16 +36,16 @@ game_state = STATE_START
 font = pygame.font.Font(None, 40)
 
 # ✅ Enemy Selection Variables
-enemy_names = list(OPPONENTS.keys())  # ✅ Load enemy names dynamically
+enemy_names = list(OPPONENT_SPRITES.keys())  # ✅ Get enemy names
 selected_enemy_index = 0
 enemy_name = enemy_names[selected_enemy_index]  # ✅ Set default opponent
 
-# ✅ Create player and opponent
+# ✅ Create player
 player = Player(100, FLOOR_HEIGHT)
 
-# ✅ Opponent stats (assigned after selection)
-opponent_stats = OPPONENTS[enemy_name]  # Default to first opponent
-opponent = Opponent(600, FLOOR_HEIGHT, speed=opponent_stats["speed"], punch_range=100, punch_damage=opponent_stats["punch_damage"])
+# ✅ Assign opponent dynamically based on selection
+opponent_stats = OPPONENTS[enemy_name]
+opponent = Opponent(600, FLOOR_HEIGHT, speed=opponent_stats["speed"], punch_range=100, punch_damage=opponent_stats["punch_damage"], name=enemy_name)
 
 # ✅ Round Tracking
 player_round_wins = 0
@@ -75,6 +82,7 @@ def check_game_over():
         if opponent_round_wins >= 3:
             game_state = STATE_GAME_OVER
             print("Game Over - You Lost!")
+            current_round=1
         else:
             game_state = STATE_ROUND_LOSE
             print(f"Next round: {current_round}")
@@ -91,6 +99,7 @@ def check_game_over():
         if player_round_wins >= 3:
             game_state = STATE_GAME_OVER
             print("Game Over - You Won!")
+            current_round=1
         else:
             game_state = STATE_ROUND_WIN
             print(f"Next round: {current_round}")
@@ -125,7 +134,7 @@ while running:
                 if event.key == pygame.K_RETURN:
                     enemy_name = enemy_names[selected_enemy_index]
                     opponent_stats = OPPONENTS[enemy_name]
-                    opponent = Opponent(600, FLOOR_HEIGHT, speed=opponent_stats["speed"], punch_range=100, punch_damage=opponent_stats["punch_damage"])
+                    opponent = Opponent(600, FLOOR_HEIGHT, speed=opponent_stats["speed"], punch_range=100, punch_damage=opponent_stats["punch_damage"], name=enemy_name)
                     game_state = STATE_PLAYING
 
         # **Pause Screen Logic**
@@ -137,16 +146,16 @@ while running:
         elif game_state == STATE_ROUND_WIN:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 print(f"Starting Round {current_round}...")
-                player.health = player.max_health
-                opponent.health = opponent.max_health
+                player.reset_position()
+                opponent.reset_position()
                 game_state = STATE_PLAYING
 
         # **Round Lose Screen**
         elif game_state == STATE_ROUND_LOSE:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 print(f"Starting Round {current_round}...")
-                player.health = player.max_health
-                opponent.health = opponent.max_health
+                player.reset_position()
+                opponent.reset_position()
                 game_state = STATE_PLAYING
 
         # **Final Game Over Screen**
@@ -157,8 +166,8 @@ while running:
                     player_round_wins = 0
                     opponent_round_wins = 0
                     current_round = 1
-                    player.health = player.max_health
-                    opponent.health = opponent.max_health
+                    player.reset_position()
+                    opponent.reset_position()
                     game_state = STATE_PLAYING
 
                 if event.key == pygame.K_j:
@@ -192,27 +201,24 @@ while running:
     elif game_state == STATE_PLAYING:
         screen.blit(game_background, (0, 0))
 
-        # ✅ Update Player
         player.handle_input(keys)
         player.apply_gravity()
         player.update_animation(10, 8)
         player.draw(screen, character_frames, punch_frames)
 
-        # ✅ Update Opponent AI
         opponent.update(player.rect.x)
         opponent.draw(screen)
 
-        # ✅ Draw Health Bars
         draw_health_bars(screen, player, opponent, enemy_name)
 
-        # ✅ Attack Logic
+        # ✅ Punch Detection (Player Punching Opponent)
         if player.is_punching and abs(player.rect.x - opponent.rect.x) < 50:
-            opponent.take_damage(5)
+            opponent.take_damage(10)
 
+        # ✅ Punch Detection (Opponent Punching Player)
         if opponent.state == "punching" and abs(player.rect.x - opponent.rect.x) < 50:
             player.take_damage(opponent.punch_damage)
 
-        # ✅ Check for game over
         check_game_over()
 
     pygame.display.flip()
