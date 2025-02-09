@@ -16,7 +16,7 @@ win_screen_image = pygame.image.load("win_screen.jpg")
 win_screen_image = pygame.transform.scale(win_screen_image, (1200, 600))
 
 pause_screen_image= pygame.image.load("pause_screen.jpg")  
-pause_screen_image = pygame.transform.scale(win_screen_image, (1200, 600))
+pause_screen_image = pygame.transform.scale(pause_screen_image, (1200, 600))
 
 
 def draw_start_screen(screen, font):
