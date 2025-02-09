@@ -71,21 +71,33 @@ def check_game_over():
         print(f"You lost Round {current_round}!")
         opponent_round_wins += 1
         current_round += 1
+
         if opponent_round_wins >= 3:
             game_state = STATE_GAME_OVER
-            current_round=1
+            print("Game Over - You Lost!")
         else:
             game_state = STATE_ROUND_LOSE
+            print(f"Next round: {current_round}")
+
+        # ✅ Reset Positions
+        player.reset_position()
+        opponent.reset_position()
 
     elif opponent.health <= 0:
         print(f"You won Round {current_round}!")
         player_round_wins += 1
         current_round += 1
+
         if player_round_wins >= 3:
             game_state = STATE_GAME_OVER
-            current_round=1
+            print("Game Over - You Won!")
         else:
             game_state = STATE_ROUND_WIN
+            print(f"Next round: {current_round}")
+
+        # ✅ Reset Positions
+        player.reset_position()
+        opponent.reset_position()
 
 # ✅ Main game loop
 running = True
