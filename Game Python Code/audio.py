@@ -13,6 +13,6 @@ landing_sound = pygame.mixer.Sound("assets/sounds/landing.mp3")
 # Set volume for sounds
 block_sound.set_volume(1.0)
 punch_sound.set_volume(1.0)
-walking_sound.set_volume(1.0)
+walking_sound.set_volume(3.0)
 knock_out_sound.set_volume(1.0)
 landing_sound.set_volume(1.0)
