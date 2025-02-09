@@ -2,7 +2,13 @@ import pygame
 from settings import *
 from player import Player
 from opponent import Opponent
-from ui_screens import draw_start_screen, draw_select_screen, draw_pause_screen
+from ui_screens import (
+    draw_start_screen,
+    draw_select_screen,
+    draw_pause_screen,
+    draw_win_screen,
+    draw_lose_screen
+)
 from assets import enemy_sprites, character_frames, punch_frames
 
 # ✅ Initialize pygame
@@ -52,14 +58,15 @@ def check_game_over():
     global game_state
     if player.health <= 0:
         print("Game Over! You lost!")
-        game_state = STATE_START  # Restart game on loss
-        opponent.health=100
+        game_state = STATE_LOSE  # ✅ Now switches to lose screen
         player.health=100
+        opponent.health=100
+
     elif opponent.health <= 0:
         print("You won the fight!")
-        game_state = STATE_START  # Restart game on win
-        opponent.health=100
+        game_state = STATE_WIN  # ✅ Now switches to win screen
         player.health=100
+        opponent.health=100
 
 # ✅ Main game loop
 running = True
@@ -80,12 +87,10 @@ while running:
         # **Selection Screen Logic**
         elif game_state == STATE_SELECT:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_DOWN and can_navigate:
+                if event.key == pygame.K_DOWN:
                     selected_enemy_index = (selected_enemy_index + 1) % len(enemy_names)
-                    can_navigate = False
-                if event.key == pygame.K_UP and can_navigate:
+                if event.key == pygame.K_UP:
                     selected_enemy_index = (selected_enemy_index - 1) % len(enemy_names)
-                    can_navigate = False
                 if event.key == pygame.K_RETURN:
                     enemy_name = enemy_names[selected_enemy_index]  # ✅ Get selected opponent name
                     opponent = Opponent(600, FLOOR_HEIGHT, speed=2, punch_range=100)  # ✅ Reset opponent
@@ -96,33 +101,40 @@ while running:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 game_state = STATE_PLAYING
 
+        # **Win/Lose Handling**
+        elif game_state in [STATE_WIN, STATE_LOSE]:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:  # ✅ Restart the match
+                    print("Restarting Match...")  # ✅ Debugging
+                    player.health = player.max_health
+                    opponent.health = opponent.max_health
+                    game_state = STATE_PLAYING
+
+                if event.key == pygame.K_j:  # ✅ Go back to character select
+                    print("Returning to Character Select...")  # ✅ Debugging
+                    game_state = STATE_SELECT
+
         # **Game Playing Logic**
         elif game_state == STATE_PLAYING:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
                 game_state = STATE_PAUSED
             player.handle_event(event)
 
-        # **Reset Menu Navigation Delay**
-        if event.type == pygame.KEYUP:
-            can_navigate = True  # Allows another selection after releasing key
-
     keys = pygame.key.get_pressed()
 
-    # **Start Screen**
+    # **Screen Rendering Based on State**
     if game_state == STATE_START:
         draw_start_screen(screen, font)
-
-    # **Enemy Selection Screen**
     elif game_state == STATE_SELECT:
         draw_select_screen(screen, font, enemy_names, selected_enemy_index)
-
-    # **Pause Screen**
     elif game_state == STATE_PAUSED:
         draw_pause_screen(screen, font)
-
-    # **Game Playing**
+    elif game_state == STATE_WIN:
+        draw_win_screen(screen, font)
+    elif game_state == STATE_LOSE:
+        draw_lose_screen(screen, font)
     elif game_state == STATE_PLAYING:
-        screen.blit(game_background, (0, 0))  # ✅ Game background
+        screen.blit(game_background, (0, 0))
 
         # ✅ Update Player
         player.handle_input(keys)
@@ -135,7 +147,7 @@ while running:
         opponent.draw(screen)
 
         # ✅ Draw labeled health bars
-        draw_health_bars(screen, player, opponent, enemy_name)  # ✅ Pass opponent's name
+        draw_health_bars(screen, player, opponent, enemy_name)
 
         # ✅ Attack Logic
         if player.is_punching and abs(player.rect.x - opponent.rect.x) < 50:

@@ -9,9 +9,11 @@ start_screen_image = pygame.transform.scale(start_screen_image, (1200, 600))
 select_screen_image = pygame.image.load("BackgroundPlayerSelect.jpg")  
 select_screen_image = pygame.transform.scale(select_screen_image, (1200, 600))
 
-pause_screen_image = pygame.image.load("pauseScreen.jpg")  
-pause_screen_image = pygame.transform.scale(pause_screen_image, (1200, 600))
+lose_screen_image = pygame.image.load("lose_screen.jpg")  
+lose_screen_image = pygame.transform.scale(lose_screen_image, (1200, 600))
 
+win_screen_image = pygame.image.load("win_screen.jpg")  
+win_screen_image = pygame.transform.scale(win_screen_image, (1200, 600))
 
 
 def draw_start_screen(screen, font):
@@ -53,3 +55,34 @@ def draw_pause_screen(screen, font):
     text = font.render("Game Paused - Press P to Resume", True, WHITE)
     screen.blit(text, (200, 300))
     pygame.display.flip()
+
+
+def draw_win_screen(screen, font):
+    """Draws the win screen with retry and character select options"""
+    screen.blit(win_screen_image, (0, 0))  # ✅ Background for win screen
+
+    text = font.render("You Win!", True, WHITE)
+    retry_text = font.render("Press R to Retry", True, WHITE)
+    select_text = font.render("Press J to Character Select", True, WHITE)
+
+    screen.blit(text, (450, 200))
+    screen.blit(retry_text, (450, 300))
+    screen.blit(select_text, (450, 350))
+
+    pygame.display.flip()
+
+
+def draw_lose_screen(screen, font):
+    """Draws the lose screen with retry and character select options"""
+    screen.blit(lose_screen_image, (0, 0))  # ✅ Background for lose screen
+
+    text = font.render("You Lose!", True, WHITE)
+    retry_text = font.render("Press R to Retry", True, WHITE)
+    select_text = font.render("Press J to Character Select", True, WHITE)
+
+    screen.blit(text, (450, 200))
+    screen.blit(retry_text, (450, 300))
+    screen.blit(select_text, (450, 350))
+
+    pygame.display.flip()
+
